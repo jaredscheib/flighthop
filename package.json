@@ -1,0 +1,27 @@
+{
+  "name": "flighthop",
+  "version": "0.0.1",
+  "description": "Simple flight search via Google Flight API with Facebook login",
+  "main": "server/index.js",
+  "dependencies": {
+    "bluebird": "^3.4.7",
+    "express": "^4.14.0"
+  },
+  "devDependencies": {
+    "eslint": "^3.13.1",
+    "eslint-config-airbnb-base": "^11.0.1",
+    "eslint-plugin-import": "^2.2.0",
+    "nodemon": "^1.11.0"
+  },
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jaredscheib/flighthop.git"
+  },
+  "author": "Jared Scheib",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jaredscheib/flighthop/issues"
+  },
+  "homepage": "https://github.com/jaredscheib/flighthop#readme"
+}
