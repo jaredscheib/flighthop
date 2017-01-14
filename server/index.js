@@ -10,6 +10,11 @@ require('dotenv').config();
 
 app.use(express.static(`${__dirname}/public`));
 
+app.get('/flight', (req, res) => {
+  console.log(req.query);
+  res.send();
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
