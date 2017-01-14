@@ -35,6 +35,12 @@ const getAirportCodes = (geo, dist) => {
   });
 };
 
+const getFlights = (codes) => {
+  const server = 'http://localhost:3001';
+  const url = `${server}/flight`;
+  return Promise.all(codes.map(code => axios.get(url, { params: { code } })));
+};
+
 const loadDependency = url => new Promise((resolve, reject) => {
   const scr = document.createElement('script');
   scr.onload = resolve;
@@ -54,7 +60,7 @@ Promise.all(dependencies.map(loadDependency))
 })
 .then(getUserLoc)
 .then(getAirportCodes)
-.then(console.log);
+.then(getFlights);
 
 </script>
   </body>
