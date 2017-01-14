@@ -10,6 +10,37 @@
   </head>
   <body>
     <div id="app"></div>
-    <script src="app.js"></script>
+<script>
+/* global axios, X2JS */
+
+const dependencies = [
+  'https://cdnjs.cloudflare.com/ajax/libs/axios/0.15.3/axios.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/x2js/1.2.0/xml2json.min.js',
+];
+
+const onAllDependenciesLoaded = () => {
+  console.log('beep', axios, X2JS);
+  // axios.get('');
+// sample airport code request
+// http://aviationweather.gov/adds/dataserver_current/httpparam?dataSource=stations&requestType=retrieve&format=xml&radialDistance=20;-122.4411147,37.7718305
+};
+
+const loadDependencies = (deps) => {
+  let count = deps.length;
+
+  deps.forEach((dep) => {
+    const scr = document.createElement('script');
+    scr.onload = () => {
+      count -= 1;
+      if (count === 0) onAllDependenciesLoaded();
+    };
+    scr.src = dep;
+    document.body.appendChild(scr);
+  });
+};
+
+loadDependencies(dependencies);
+
+</script>
   </body>
 </html>
