@@ -31,11 +31,6 @@ const getAirportCodesFromGeo = (geo, dist) => {
   });
 };
 
-const dependencies = [
-  'https://cdnjs.cloudflare.com/ajax/libs/axios/0.15.3/axios.min.js',
-  'https://cdnjs.cloudflare.com/ajax/libs/x2js/1.2.0/xml2json.min.js',
-];
-
 const onAllDependenciesLoaded = () => {
   x2js = new X2JS();
   getAirportCodesFromGeo([])
@@ -44,21 +39,20 @@ const onAllDependenciesLoaded = () => {
   });
 };
 
-const loadDependencies = (deps) => {
-  let count = deps.length;
+const loadDependency = url => new Promise((resolve, reject) => {
+  const scr = document.createElement('script');
+  scr.onload = resolve;
+  scr.src = url;
+  document.body.appendChild(scr);
+});
 
-  deps.forEach((dep) => {
-    const scr = document.createElement('script');
-    scr.onload = () => {
-      count -= 1;
-      if (count === 0) onAllDependenciesLoaded();
-    };
-    scr.src = dep;
-    document.body.appendChild(scr);
-  });
-};
+const dependencies = [
+  'https://cdnjs.cloudflare.com/ajax/libs/axios/0.15.3/axios.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/x2js/1.2.0/xml2json.min.js',
+];
 
-loadDependencies(dependencies);
+Promise.all(dependencies.map(loadDependency))
+.then(onAllDependenciesLoaded);
 
 </script>
   </body>
