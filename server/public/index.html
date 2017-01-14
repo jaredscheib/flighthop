@@ -23,8 +23,6 @@ const getAirportCodes = (geo, dist) => {
   const lng = geo[1] || -122.4411147;
   dist = dist || 20;
 
-  x2js = new X2JS();
-
   // could add &fields=station_id param
   const url = `http://aviationweather.gov/adds/dataserver_current/httpparam?dataSource=stations&requestType=retrieve&format=xml&radialDistance=${dist};${lng},${lat}`;
 
@@ -50,6 +48,10 @@ const dependencies = [
 ];
 
 Promise.all(dependencies.map(loadDependency))
+.then(() => {
+  x2js = new X2JS();
+  return Promise.resolve();
+})
 .then(getUserLoc)
 .then(getAirportCodes)
 .then(console.log);
