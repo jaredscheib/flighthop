@@ -14,10 +14,16 @@
 /* global axios, X2JS */
 let x2js;
 
-const getAirportCodesFromGeo = (geo, dist) => {
-  const lng = geo[0] || -122.4411147;
-  const lat = geo[1] || 37.7718305;
+const getUserLoc = () => new Promise((resolve, reject) =>
+  navigator.geolocation.getCurrentPosition(({ coords }) =>
+    resolve([coords.latitude, coords.longitude])));
+
+const getAirportCodes = (geo, dist) => {
+  const lat = geo[0] || 37.7718305;
+  const lng = geo[1] || -122.4411147;
   dist = dist || 20;
+
+  x2js = new X2JS();
 
   // could add &fields=station_id param
   const url = `http://aviationweather.gov/adds/dataserver_current/httpparam?dataSource=stations&requestType=retrieve&format=xml&radialDistance=${dist};${lng},${lat}`;
@@ -28,14 +34,6 @@ const getAirportCodesFromGeo = (geo, dist) => {
     return Array.isArray(resJson) ?
       resJson.map(station => station.station_id.slice(1)) :
       resJson.station_id.slice(1);
-  });
-};
-
-const onAllDependenciesLoaded = () => {
-  x2js = new X2JS();
-  getAirportCodesFromGeo([])
-  .then((res) => {
-    console.log('res', res);
   });
 };
 
@@ -52,7 +50,9 @@ const dependencies = [
 ];
 
 Promise.all(dependencies.map(loadDependency))
-.then(onAllDependenciesLoaded);
+.then(getUserLoc)
+.then(getAirportCodes)
+.then(console.log);
 
 </script>
   </body>
