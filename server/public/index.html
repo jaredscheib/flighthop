@@ -19,6 +19,7 @@ const getAirportCodesFromGeo = (geo, dist) => {
   const lat = geo[1] || 37.7718305;
   dist = dist || 20;
 
+  // could add &fields=station_id param
   const url = `http://aviationweather.gov/adds/dataserver_current/httpparam?dataSource=stations&requestType=retrieve&format=xml&radialDistance=${dist};${lng},${lat}`;
 
   return axios.get(url, { validateStatus: status => status === 200 })
