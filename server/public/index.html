@@ -25,6 +25,8 @@
           style="width: 60px;"
           onClick="onSubmitCodes()"
         />
+        <br />
+        <span>Status: </span><span id="spanMessage" style="font-size: 13px;"></span>
       </form>
     </div>
 <script>
@@ -34,12 +36,31 @@ let x2js;
 const el = {};
 el.textCodes = document.getElementById('textCodes');
 el.btnSubmitCodes = document.getElementById('btnSubmitCodes');
+el.spanMessage = document.getElementById('spanMessage');
 
-const getUserLoc = () => new Promise((resolve, reject) =>
-  navigator.geolocation.getCurrentPosition(({ coords }) =>
-    resolve([coords.latitude, coords.longitude])));
+const showMessage = (text, color, disappear) => {
+  el.spanMessage.textContent = text;
+  el.spanMessage.style.color = color;
+  if (disappear) {
+    setTimeout(() => {
+      el.spanMessage.textContent = 'Ready.';
+      el.spanMessage.style.color = 'black';
+    }, 1000);
+  }
+};
 
-const getAirportCodes = (geo, dist) => {
+const getUserLoc = () => new Promise((resolve, reject) => {
+  showMessage('Determining your location..', 'green');
+  return navigator.geolocation.getCurrentPosition(
+    ({ coords }) =>
+      resolve([coords.latitude, coords.longitude]),
+    (error) => {
+      showMessage('Could not determine your location. Please enter codes manually.', 'red');
+      reject(error);
+    });
+});
+
+const getAirportCodesFromGeo = (geo, dist) => {
   const lat = geo[0] || 37.7718305;
   const lng = geo[1] || -122.4411147;
   dist = dist || 20;
@@ -47,12 +68,17 @@ const getAirportCodes = (geo, dist) => {
   // could add &fields=station_id param
   const url = `http://aviationweather.gov/adds/dataserver_current/httpparam?dataSource=stations&requestType=retrieve&format=xml&radialDistance=${dist};${lng},${lat}`;
 
+  showMessage('Determining your airport codes..', 'blue', true);
   return axios.get(url, { validateStatus: status => status === 200 })
   .then((resXml) => {
     const resJson = x2js.xml_str2json(resXml.data).response.data.Station;
     return Array.isArray(resJson) ?
       resJson.map(station => station.station_id.slice(1)) :
       [resJson.station_id.slice(1)];
+  })
+  .catch((error) => {
+    showMessage('Could not determine airport codes from location. Please enter manually.', 'red', true);
+    return Promise.error();
   });
 };
 
@@ -66,8 +92,11 @@ const onSubmitCodes = () => {
   let codes = (el.textCodes.value.split(',').filter(str => str.length > 0));
   el.textCodes.value = codes.join(',');
   if (codes.length > 0) {
+    showMessage(`Getting flights for ${codes}..`, 'blue');
     console.log('Request flights for', codes);
     return getFlights(codes);
+  } else {
+    return showMessage('Please enter an airport code.', 'red');
   }
 };
 
@@ -89,11 +118,12 @@ Promise.all(dependencies.map(loadDependency))
   return Promise.resolve();
 })
 .then(getUserLoc)
-.then(getAirportCodes)
+.then(getAirportCodesFromGeo)
 .then((codes) => {
   if (codes.length) el.textCodes.value = codes.join(',');
-});
-// .then(getFlights);
+})
+// .then(getFlights)
+.catch(error => console.log(error));
 
 </script>
   </body>
