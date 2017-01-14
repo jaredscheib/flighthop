@@ -12,6 +12,7 @@
     <div id="app"></div>
 <script>
 /* global axios, X2JS */
+let x2js;
 
 const getAirportCodesFromGeo = (geo, dist) => {
   const lng = geo[0] || -122.4411147;
@@ -20,9 +21,12 @@ const getAirportCodesFromGeo = (geo, dist) => {
 
   const url = `http://aviationweather.gov/adds/dataserver_current/httpparam?dataSource=stations&requestType=retrieve&format=xml&radialDistance=${dist};${lng},${lat}`;
 
-  return axios.get(url)
-  .then((resp) => {
-    console.log('xml', resp);
+  return axios.get(url, { validateStatus: status => status === 200 })
+  .then((resXml) => {
+    const resJson = x2js.xml_str2json(resXml.data).response.data.Station;
+    return Array.isArray(resJson) ?
+      resJson.map(station => station.station_id.slice(1)) :
+      resJson.station_id.slice(1);
   });
 };
 
@@ -32,7 +36,11 @@ const dependencies = [
 ];
 
 const onAllDependenciesLoaded = () => {
-  getAirportCodesFromGeo([]);
+  x2js = new X2JS();
+  getAirportCodesFromGeo([])
+  .then((res) => {
+    console.log('res', res);
+  });
 };
 
 const loadDependencies = (deps) => {
