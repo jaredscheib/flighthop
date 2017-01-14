@@ -33,7 +33,7 @@ const getAirportCodes = (geo, dist) => {
     const resJson = x2js.xml_str2json(resXml.data).response.data.Station;
     return Array.isArray(resJson) ?
       resJson.map(station => station.station_id.slice(1)) :
-      resJson.station_id.slice(1);
+      [resJson.station_id.slice(1)];
   });
 };
 
