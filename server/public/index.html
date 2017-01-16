@@ -203,7 +203,7 @@ const onSubmitCodes = () => {
   const codesFrom = (el.textCodesFrom.value.split(',').filter(str => str.length > 0));
   const codeTo = (el.textCodeTo.value);
   const date = (el.textDate.value);
-  el.textCodeTo.value = codesFrom.join(',');
+  el.textCodesFrom.value = codesFrom.join(',');
   if (codesFrom.length > 0) {
     const flightReqs = codesFrom.map((codeFrom) => { return { codeFrom, codeTo, date }; });
     showMessage(`Getting flights for ${codesFrom}..`, 'blue');
