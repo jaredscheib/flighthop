@@ -177,8 +177,8 @@ const getFlights = (flightReqs) => {
       return Promise.all(flightReqs.map((flightReq) => {
         const { codeFrom, codeTo, date } = flightReq;
         return axios.post(url, { codeFrom, codeTo, date, accessToken })
-        .then((resp) => {
-          console.log('resp', resp);
+        .then((data) => {
+          console.log('data', data);
         });
       }));
     } else {

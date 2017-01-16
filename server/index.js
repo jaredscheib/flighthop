@@ -62,9 +62,9 @@ app.post('/flight', (req, res) => {
           refundable: false
         }
       })
-      .then((resp) => {
-        console.log('QPX response', resp);
-        res.send(resp);
+      .then(({ data }) => {
+        console.log('QPX response', data);
+        res.send(data);
       });
     } else {
       console.log('Unauthorized request.');
