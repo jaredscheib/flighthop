@@ -209,19 +209,21 @@ const onSubmitCodes = () => {
     showMessage(`Getting flights for ${codesFrom}..`, 'blue');
     console.log('Flight requests:', flightReqs);
     getFlights(flightReqs)
-    .then((resp) => {
-      if (resp.status === 200) {
-        showMessage('Flight data received.', 'blue', true);
-        console.log('data', resp.data);
-        resp.data.trips.tripOption.forEach(({ pricing }) => {
-          const li = document.createElement('li');
-          li.textContent = JSON.stringify(pricing[0]);
-          el.listFlightOptions.appendChild(li);
-        });
-      } else {
-        showMessage('Failed to retrieve flight data.', 'red');
-        console.log(resp);
-      }
+    .then((responses) => {
+      responses.forEach((resp) => {
+        if (resp.status === 200) {
+          showMessage('Flight data received.', 'blue', true);
+          console.log('data', resp.data);
+          resp.data.trips.tripOption.forEach(({ pricing }) => {
+            const li = document.createElement('li');
+            li.textContent = JSON.stringify(pricing[0]);
+            el.listFlightOptions.appendChild(li);
+          });
+        } else {
+          showMessage('Failed to retrieve flight data.', 'red');
+          console.log(resp);
+        }
+      });
     });
   } else {
     showMessage('Please enter an airport code.', 'red');
