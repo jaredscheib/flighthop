@@ -41,7 +41,7 @@
 })(document, 'script', 'facebook-jssdk');
 
 let x2js;
-const server = 'http://localhost:3001';
+const server = 'https://so-important.com';
 
 const el = {};
 el.textCodes = document.getElementById('textCodes');
@@ -121,7 +121,7 @@ const getAirportCodesFromGeo = (geo, dist) => {
   dist = dist || 20;
 
   // could add &fields=station_id param
-  const url = `http://aviationweather.gov/adds/dataserver_current/httpparam?dataSource=stations&requestType=retrieve&format=xml&radialDistance=${dist};${lng},${lat}`;
+  const url = `https://aviationweather.gov/adds/dataserver_current/httpparam?dataSource=stations&requestType=retrieve&format=xml&radialDistance=${dist};${lng},${lat}`;
 
   showMessage('Determining your airport codes..', 'blue', true);
   return axios.get(url, { validateStatus: status => status === 200 })
