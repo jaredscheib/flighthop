@@ -35,12 +35,38 @@ app.post('/login', (req, res) => {
   });
 });
 
-app.get('/flight', (req, res) => {
-  console.log('/flight', req.query);
-  fbIsTokenValid(req.query.accessToken)
+app.post('/flight', (req, res) => {
+  console.log('/flight', req.body);
+  fbIsTokenValid(req.body.accessToken)
   .then((isValid) => {
     if (isValid) {
       console.log('Authorized request. Getting flight data..');
+      const { codeFrom, codeTo, date } = req.body;
+      axios.post('https://www.googleapis.com/qpxExpress/v1/trips/search', {
+        key: process.env.API_QPX_KEY,
+        request: {
+          slice: [
+            {
+              origin: codeFrom,
+              destination: codeTo,
+              date,
+            }
+          ],
+          passengers: {
+            adultCount: 1,
+            infantInLapCount: 0,
+            infantInSeatCount: 0,
+            childCount: 0,
+            seniorCount: 0
+          },
+          solutions: 20,
+          refundable: false
+        }
+      })
+      .then((resp) => {
+        console.log('QPX response', resp);
+        res.send(resp);
+      });
     } else {
       console.log('Unauthorized request.');
       res.sendStatus(401);

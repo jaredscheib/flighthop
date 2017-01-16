@@ -176,7 +176,7 @@ const getFlights = (flightReqs) => {
     if (accessToken) {
       return Promise.all(flightReqs.map((flightReq) => {
         const { codeFrom, codeTo, date } = flightReq;
-        return axios.get(url, { params: { codeFrom, codeTo, date, accessToken } })
+        return axios.post(url, { codeFrom, codeTo, date, accessToken })
         .then((resp) => {
           console.log('resp', resp);
         });
