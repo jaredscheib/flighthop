@@ -82,13 +82,15 @@ const getFBAccessToken = () =>
     FB.getLoginStatus((resp) => {
       // console.log(resp);
       if (resp.status === 'connected') {
+        showMessage('Logged in.', 'blue', true);
         console.log('Logged in.');
-        showMessage('Logged in successfully.', 'blue', true);
         resolve(resp.authResponse.accessToken);
       } else if (resp.status === 'not_authorized') {
+        showMessage('Unauthorized request. Please log in.', 'red');
         console.log('Not authorized.');
         reject(null);
       } else {
+        showMessage('Unauthorized request. Please log in.', 'red');
         console.log('Not logged in or authorized.');
         reject(null);
       }
@@ -167,9 +169,9 @@ const onSubmitCodes = () => {
   if (codes.length > 0) {
     showMessage(`Getting flights for ${codes}..`, 'blue');
     console.log('Request flights for', codes);
-    return getFlights(codes);
+    getFlights(codes);
   } else {
-    return showMessage('Please enter an airport code.', 'red');
+    showMessage('Please enter an airport code.', 'red');
   }
 };
 
