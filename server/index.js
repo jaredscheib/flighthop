@@ -42,8 +42,7 @@ app.post('/flight', (req, res) => {
     if (isValid) {
       console.log('Authorized request. Getting flight data..');
       const { codeFrom, codeTo, date } = req.body;
-      axios.post('https://www.googleapis.com/qpxExpress/v1/trips/search', {
-        key: process.env.API_QPX_KEY,
+      axios.post(`https://www.googleapis.com/qpxExpress/v1/trips/search?key=${process.env.API_QPX_KEY}`, {
         request: {
           slice: [
             {
