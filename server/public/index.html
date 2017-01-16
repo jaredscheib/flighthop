@@ -44,6 +44,11 @@
         />
         <br />
         <span>Status: </span><span id="spanMessage" style="font-size: 13px;"></span>
+        <br />
+        <div>
+        <span>Flight Options:</span><br />
+        <ol id="listFlightOptions">
+        </div>
       </form>
     </div>
 <script>
@@ -65,6 +70,7 @@ el.textCodeTo = document.getElementById('textCodeTo');
 el.textDate = document.getElementById('textDate');
 el.btnSubmitCodes = document.getElementById('btnSubmitCodes');
 el.spanMessage = document.getElementById('spanMessage');
+el.listFlightOptions = document.getElementById('listFlightOptions');
 
 const getDate = () => {
   let today = new Date();
@@ -176,10 +182,7 @@ const getFlights = (flightReqs) => {
     if (accessToken) {
       return Promise.all(flightReqs.map((flightReq) => {
         const { codeFrom, codeTo, date } = flightReq;
-        return axios.post(url, { codeFrom, codeTo, date, accessToken })
-        .then((data) => {
-          console.log('data', data);
-        });
+        return axios.post(url, { codeFrom, codeTo, date, accessToken });
       }));
     } else {
       showMessage('Unauthorized request. Please log in.', 'red');
@@ -205,7 +208,15 @@ const onSubmitCodes = () => {
     const flightReqs = codesFrom.map((codeFrom) => { return { codeFrom, codeTo, date }; });
     showMessage(`Getting flights for ${codesFrom}..`, 'blue');
     console.log('Flight requests:', flightReqs);
-    getFlights(flightReqs);
+    getFlights(flightReqs)
+    .then((data) => {
+      console.log('data', data);
+      data.trips.tripOption.forEach((opt) => {
+        const li = document.createElement('li');
+        li.textContent = JSON.stringify(opt);
+        el.listFlightOptions.appendChild(li);
+      });
+    });
   } else {
     showMessage('Please enter an airport code.', 'red');
   }
