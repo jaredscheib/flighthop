@@ -205,6 +205,8 @@ const onSubmitCodes = () => {
   const date = (el.textDate.value);
   el.textCodesFrom.value = codesFrom.join(',');
   if (codesFrom.length > 0) {
+    el.listFlightOptions.innerHTML = ''
+    
     const flightReqs = codesFrom.map((codeFrom) => { return { codeFrom, codeTo, date }; });
     showMessage(`Getting flights for ${codesFrom}..`, 'blue');
     console.log('Flight requests:', flightReqs);
