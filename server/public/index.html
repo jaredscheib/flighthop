@@ -101,7 +101,7 @@ const getAirportCodesFromGeo = (geo, dist) => {
   })
   .catch((error) => {
     showMessage('Could not determine airport codes from location. Please enter manually.', 'red', true);
-    return Promise.error();
+    return Promise.reject(error);
   });
 };
 
