@@ -11,7 +11,7 @@
   <body>
     <div id="fb-root"></div>
     <div id="app">
-      <div class="fb-login-button" data-max-rows="1" data-size="medium" data-show-faces="false" data-auto-logout-link="true" scope="public_profile,email" onlogin="checkLoginState();"></div>
+      <div class="fb-login-button" data-max-rows="1" data-size="medium" data-show-faces="false" data-auto-logout-link="true" scope="public_profile,email" onlogin="onFBLogin();"></div>
       <form>
         Airports: <input
           type="text"
@@ -21,10 +21,9 @@
         />
         <input
           type="button"
-          value="Find
-          Flights"
+          value="Find Flights"
           id="btnSubmitCodes"
-          style="width: 60px;"
+          style="width: 85px;"
           onClick="onSubmitCodes()"
         />
         <br />
@@ -41,20 +40,8 @@
   fjs.parentNode.insertBefore(js, fjs);
 })(document, 'script', 'facebook-jssdk');
 
-const checkLoginState = () => {
-  FB.getLoginStatus((resp) => {
-    console.log(resp);
-    if (resp.status === 'connected') {
-      console.log('Logged in.');
-    } else if (resp.status === 'not_authorized') {
-      console.log('Not authorized.');
-    } else {
-      console.log('Not logged in or authorized.');
-    }
-  });
-};
-
 let x2js;
+const server = 'http://localhost:3001';
 
 const el = {};
 el.textCodes = document.getElementById('textCodes');
@@ -70,6 +57,49 @@ const showMessage = (text, color, disappear) => {
       el.spanMessage.style.color = 'black';
     }, 1000);
   }
+};
+
+const postLogin = (accessToken) => {
+  showMessage('Authorizing login server-side.', 'blue');
+  return axios.post(`${server}/login`, { accessToken })
+  .then((resp) => {
+    // console.log(resp);
+    if (resp.status === 200) {
+      showMessage('Authorized server-side. You may now search for flights.', 'green', true);
+    } else if (resp.status === 401) {
+      showMessage('Failed to authorize server-side.', 'red', true);
+    } else {
+      showMessage('Unknown server error.', 'red', true);
+    }
+  })
+  .catch((error) => {
+    console.error(error);
+  });
+};
+
+const getFBAccessToken = () =>
+  new Promise((resolve, reject) => {
+    FB.getLoginStatus((resp) => {
+      // console.log(resp);
+      if (resp.status === 'connected') {
+        console.log('Logged in.');
+        showMessage('Logged in successfully.', 'blue', true);
+        resolve(resp.authResponse.accessToken);
+      } else if (resp.status === 'not_authorized') {
+        console.log('Not authorized.');
+        reject(null);
+      } else {
+        console.log('Not logged in or authorized.');
+        reject(null);
+      }
+    });
+  });
+
+const onFBLogin = () => {
+  getFBAccessToken()
+  .then((accessToken) => {
+    if (accessToken) postLogin(accessToken);
+  });
 };
 
 const getUserLoc = () => new Promise((resolve, reject) => {
@@ -106,9 +136,29 @@ const getAirportCodesFromGeo = (geo, dist) => {
 };
 
 const getFlights = (codes) => {
-  const server = 'http://localhost:3001';
   const url = `${server}/flight`;
-  return Promise.all(codes.map(code => axios.get(url, { params: { code } })));
+  getFBAccessToken()
+  .then((accessToken) => {
+    if (accessToken) {
+      return Promise.all(codes.map(code =>
+        axios.get(url, { params: { code, accessToken } })
+        .then((resp) => {
+          console.log('resp', resp, code);
+        })
+      ));
+    } else {
+      showMessage('Unauthorized request. Please log in.', 'red');
+      return Promise.reject('Unauthorized request.');
+    }
+  })
+  .then((resp) => {
+    console.log(resp);
+    if (resp.status === 200) {
+      showMessage('Authorized. Getting flight data.', 'blue', true);
+    } else if (resp.status === 401) showMessage('Unauthorized request. Please log in.', 'red');
+    else showMessage('Unknown error.', 'red');
+  })
+  .catch(console.error);
 };
 
 const onSubmitCodes = () => {
@@ -146,7 +196,7 @@ Promise.all(dependencies.map(loadDependency))
   if (codes.length) el.textCodes.value = codes.join(',');
 })
 // .then(getFlights)
-.catch(error => console.log(error));
+.catch(error => console.error(error));
 
 </script>
   </body>

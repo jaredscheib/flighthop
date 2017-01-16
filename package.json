@@ -4,6 +4,7 @@
   "description": "Simple flight search via Google Flight API with Facebook login",
   "main": "server/index.js",
   "dependencies": {
+    "axios": "^0.15.3",
     "bluebird": "^3.4.7",
     "body-parser": "^1.15.2",
     "cors": "^2.8.1",
