@@ -13,12 +13,28 @@
     <div id="app">
       <div class="fb-login-button" data-max-rows="1" data-size="medium" data-show-faces="false" data-auto-logout-link="true" scope="public_profile,email" onlogin="onFBLogin();"></div>
       <form>
-        Airports: <input
+        Origin(s): <input
           type="text"
-          placeholder="enter codes to search"
-          id="textCodes"
+          placeholder="enter airport code(s)"
+          id="textCodesFrom"
           style="width: 150px;"
         />
+        <br />
+        Destination: <input
+          type="text"
+          placeholder="enter airport code"
+          id="textCodeTo"
+          style="width: 150px;"
+          value="LGA"
+        />
+        <br />
+        Departure Date: <input
+          type="text"
+          placeholder="yyyy-mm-dd"
+          id="textDate"
+          style="width: 150px;"
+        />
+        <br />
         <input
           type="button"
           value="Find Flights"
@@ -44,9 +60,25 @@ let x2js;
 const server = 'https://so-important.com';
 
 const el = {};
-el.textCodes = document.getElementById('textCodes');
+el.textCodesFrom = document.getElementById('textCodesFrom');
+el.textCodeTo = document.getElementById('textCodeTo');
+el.textDate = document.getElementById('textDate');
 el.btnSubmitCodes = document.getElementById('btnSubmitCodes');
 el.spanMessage = document.getElementById('spanMessage');
+
+const getDate = () => {
+  let today = new Date();
+  let dd = today.getDate();
+  let mm = today.getMonth() + 1;
+  const yyyy = today.getFullYear();
+
+  if (dd < 10) dd = `0${dd}`;
+  if (mm < 10) mm = `0${mm}`;
+
+  return `${yyyy}-${mm}-${dd}`;
+};
+
+el.textDate.value = getDate();
 
 const showMessage = (text, color, disappear) => {
   el.spanMessage.textContent = text;
@@ -137,17 +169,18 @@ const getAirportCodesFromGeo = (geo, dist) => {
   });
 };
 
-const getFlights = (codes) => {
+const getFlights = (flightReqs) => {
   const url = `${server}/flight`;
   getFBAccessToken()
   .then((accessToken) => {
     if (accessToken) {
-      return Promise.all(codes.map(code =>
-        axios.get(url, { params: { code, accessToken } })
+      return Promise.all(flightReqs.map((flightReq) => {
+        const { codeFrom, codeTo, date } = flightReq;
+        return axios.get(url, { params: { codeFrom, codeTo, date, accessToken } })
         .then((resp) => {
-          console.log('resp', resp, code);
-        })
-      ));
+          console.log('resp', resp);
+        });
+      }));
     } else {
       showMessage('Unauthorized request. Please log in.', 'red');
       return Promise.reject('Unauthorized request.');
@@ -164,12 +197,15 @@ const getFlights = (codes) => {
 };
 
 const onSubmitCodes = () => {
-  let codes = (el.textCodes.value.split(',').filter(str => str.length > 0));
-  el.textCodes.value = codes.join(',');
-  if (codes.length > 0) {
-    showMessage(`Getting flights for ${codes}..`, 'blue');
-    console.log('Request flights for', codes);
-    getFlights(codes);
+  const codesFrom = (el.textCodesFrom.value.split(',').filter(str => str.length > 0));
+  const codeTo = (el.textCodeTo.value);
+  const date = (el.textDate.value);
+  el.textCodeTo.value = codesFrom.join(',');
+  if (codesFrom.length > 0) {
+    const flightReqs = codesFrom.map((codeFrom) => { return { codeFrom, codeTo, date }; });
+    showMessage(`Getting flights for ${codesFrom}..`, 'blue');
+    console.log('Flight requests:', flightReqs);
+    getFlights(flightReqs);
   } else {
     showMessage('Please enter an airport code.', 'red');
   }
@@ -195,7 +231,7 @@ Promise.all(dependencies.map(loadDependency))
 .then(getUserLoc)
 .then(getAirportCodesFromGeo)
 .then((codes) => {
-  if (codes.length) el.textCodes.value = codes.join(',');
+  if (codes.length) el.textCodesFrom.value = codes.join(',');
 })
 // .then(getFlights)
 .catch(error => console.error(error));
